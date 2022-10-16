@@ -20,6 +20,7 @@ class framework:
             self.windowSize = self.screen.get_size()
         else:
             self.screen = pygame.display.set_mode(windowSize, pygame.DOUBLEBUF)
+        pygame.display.set_caption("TestGame")
         self.clock = pygame.time.Clock()
         self.hw = windowSize[0] / 2
         self.hh = windowSize[1] / 2
@@ -64,7 +65,7 @@ class framework:
             self.handleInput(delta)      # Handle user-inputs
             self.p.ontick(delta)
             self.handleCollision()      # Handle collisions
-            self.render()       # render everything to screen
+            self.render(delta)       # render everything to screen
 
             pygame.display.update()     # updating screen
             clock.tick(60)      # setting framerate
@@ -75,22 +76,28 @@ class framework:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                pressed = pygame.key.get_pressed()
-                if pressed[pygame.K_SPACE]:
-                    for i in range(5000):
-                        testParticle = particles.particles(1, random.randint(30, 300), (random.randint(-10, 10), random.randint(-10, 10)), (float(random.randint(-100, 100) / 10), float(random.randint(-100, 100) / 10)), random.randint(10, 100) / 10, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), random.randint(0, 1))
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_SPACE:
+                    direction = (random.randint(-1000, 1000) / 100, random.randint(-1000, 1000) / 100)
+                    direction = pygame.mouse.get_pos()
+                    direction = (direction[0] - self.hw, direction[1] - self.hh)
+                    for i in range(200):
+                        cc = (random.randint(150, 255), random.randint(0, 255), 0)
+                        testParticle = particles.particles(1, random.randint(10, 200) / 100, (self.p.position[0] + (960 / 2), self.p.position[1] + (540 / 2)), (direction[0] + random.randint(-50, 50), direction[1] + random.randint(-50, 50)), random.randint(100, 1000) / 10, cc, random.randint(0, 1), random.randint(0, 1))
                         self.particles.append(testParticle)
 
     def handleCollision(self):
         pass
 
-    def render(self):
-        self.display.fill("grey")
+    def render(self, delta):
+        self.display.fill((100, 100, 100))
         self.visibleOnScreen.draw(self.display)
         self.p.draw(self.display)
         for particle in self.particles:
             particle.position = particle.basePos - self.p.position
-            particle.draw(self.display)
+            particle.draw(self.display, delta)
             if not particle.isAlive:
                 self.particles.remove(particle)
         surf = pygame.transform.scale(self.display, self.windowSize)
